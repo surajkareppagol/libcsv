@@ -23,8 +23,11 @@ typedef struct csv_numeric_block {
 typedef struct csv_field_list {
   char *field;
 
-  struct csv_string_block *string_block;
-  struct csv_numeric_block *numeric_block;
+  struct csv_string_block *string_block_head;
+  struct csv_numeric_block *numeric_block_head;
+
+  struct csv_string_block *string_block_tail;
+  struct csv_numeric_block *numeric_block_tail;
 } CSV_FIELD_LIST;
 
 /* Top node -> csv_field_list */

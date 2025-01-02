@@ -57,17 +57,12 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
       block->next_block = NULL;
       block->data = token;
 
-      if (csv_l->field_list[field]->string_block == NULL) {
-        csv_l->field_list[field]->string_block = block;
+      if (csv_l->field_list[field]->string_block_head == NULL) {
+        csv_l->field_list[field]->string_block_head = block;
+        csv_l->field_list[field]->string_block_tail = block;
       } else {
-        CSV_STRING_BLOCK *current_block =
-            csv_l->field_list[field]->string_block;
-
-        while (current_block->next_block != NULL) {
-          current_block = current_block->next_block;
-        }
-
-        current_block->next_block = block;
+        csv_l->field_list[field]->string_block_tail->next_block = block;
+        csv_l->field_list[field]->string_block_tail = block;
       }
 
       field += 1;
