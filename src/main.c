@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 
 #include <libcsv.h>
@@ -24,16 +25,36 @@ int main(int argc, char **argv) {
 
   printf("\n");
 
-  for (int i = 0; i < metadata->fields; i++) {
-    CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+  unsigned int row = 0;
+  unsigned int field = 0;
+  bool last_row = false;
 
-    while (block != NULL) {
-      printf("| %10s | ", block->data);
+  while (1) {
+    for (int i = 0; i < metadata->fields; i++) {
+      unsigned current_row = 0;
+      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
 
-      block = block->next_block;
+      while (block != NULL) {
+        if (current_row == row) {
+          printf("| %10s | ", block->data);
+          break;
+        }
+        current_row += 1;
+
+        block = block->next_block;
+
+        if (block == NULL) {
+          last_row = true;
+        }
+      }
     }
 
+    row += 1;
     printf("\n");
+
+    if (last_row) {
+      break;
+    }
   }
 
   /************ csv_field() ************/
@@ -51,6 +72,10 @@ int main(int argc, char **argv) {
   }
 
   printf("\n");
+
+  /************ csv_export() ************/
+
+  csv_export(csv_list, NULL, metadata);
 
   return 0;
 }
