@@ -78,3 +78,15 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 
   return csv_l;
 }
+
+CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
+                          CSV_METADATA *metadata) {
+
+  for (int i = 0; i < metadata->fields; i++) {
+    if (strcmp(field, csv_list->field_list[i]->field) == 0) {
+      return csv_list->field_list[i];
+    }
+  }
+
+  return NULL;
+}
