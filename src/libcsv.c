@@ -1,3 +1,18 @@
+/**
+ * @file libcsv.h
+ * @author Suraj Kareppagol (surajkareppagol.dev@gmail.com)
+ * @brief Source file for libcsv
+ *
+ * libcsv is yet another CSV library written in C. The main goal of this library
+ * is to get CSV data from a file and convert it into a C structure, which then
+ * can be used in other applications.
+ *
+ * @version 0.1
+ * @date 2025-01-03
+ *
+ * @copyright Copyright (c) 2025
+ */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,14 +24,14 @@
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   FILE *csv_stream = fopen(csv_file, "r");
 
-  bool extract_metadata = false;
+  bool metadata_extracted = false;
   bool fields_extracted = false;
 
   if (metadata != NULL || *metadata != NULL) {
-    extract_metadata = true;
+    metadata_extracted = true;
   }
 
-  if (extract_metadata) {
+  if (metadata_extracted) {
     *metadata = calloc(1, sizeof(CSV_METADATA));
     (*metadata)->fields = 0;
   }
@@ -36,7 +51,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
     while (token != NULL) {
       token = util_trim_string(token);
 
-      if (extract_metadata) {
+      if (metadata_extracted) {
         (*metadata)->fields += 1;
       }
 
@@ -71,7 +86,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
     }
 
     fields_extracted = true;
-    extract_metadata = false;
+    metadata_extracted = false;
   }
 
   fclose(csv_stream);
@@ -81,7 +96,6 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 
 CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
                           CSV_METADATA *metadata) {
-
   for (int i = 0; i < metadata->fields; i++) {
     if (strcmp(field, csv_list->field_list[i]->field) == 0) {
       return csv_list->field_list[i];
@@ -89,4 +103,19 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
   }
 
   return NULL;
+}
+
+void csv_export(CSV_LIST *csv_list, char *csv_file) {
+  char *csv_filename = calloc(1, CSV_FILE_NAME);
+
+  /* -- Get CSV file name */
+  if (csv_file == NULL) {
+    strncpy(csv_filename, CSV_DEFAULT_FILE_NAME, strlen(CSV_DEFAULT_FILE_NAME));
+  } else {
+    strncpy(csv_filename, csv_file, strlen(csv_file));
+  }
+
+  FILE *csv_stream = fopen(csv_filename, "w");
+
+  /* TODO: Add the data to a CSV file */
 }

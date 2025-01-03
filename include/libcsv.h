@@ -1,3 +1,18 @@
+/**
+ * @file libcsv.h
+ * @author Suraj Kareppagol (surajkareppagol.dev@gmail.com)
+ * @brief Header file for libcsv
+ *
+ * libcsv is yet another CSV library written in C. The main goal of this library
+ * is to get CSV data from a file and convert it into a C structure, which then
+ * can be used in other applications.
+ *
+ * @version 0.1
+ * @date 2025-01-03
+ *
+ * @copyright Copyright (c) 2025
+ */
+
 #ifndef LIBCSV
 #define LIBCSV
 
@@ -5,6 +20,9 @@
 #define CSV_DELIMETER ","
 
 #define CSV_MAX_FIELDS 1024
+#define CSV_FILE_NAME 1024
+
+#define CSV_DEFAULT_FILE_NAME "output.csv"
 
 /************ Data Structures ************/
 
@@ -63,12 +81,18 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
  */
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 
+/**
+ * @brief Export C data structure into csv file
+ *
+ * @param data
+ * @param csv_file
+ */
+void csv_export(CSV_LIST *csv_list, char *csv_file);
+
 void csv_row();
 void csv_column();
 
 void csv_add_data();
 void csv_remove_data();
-
-void csv_export();
 
 #endif
