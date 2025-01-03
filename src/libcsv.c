@@ -105,7 +105,7 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
   return NULL;
 }
 
-void csv_export(CSV_LIST *csv_list, char *csv_file) {
+void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   char *csv_filename = calloc(1, CSV_FILE_NAME);
 
   /* -- Get CSV file name */
@@ -117,5 +117,48 @@ void csv_export(CSV_LIST *csv_list, char *csv_file) {
 
   FILE *csv_stream = fopen(csv_filename, "w");
 
-  /* TODO: Add the data to a CSV file */
+  /* -- First print fields */
+  for (int i = 0; i < metadata->fields; i++) {
+    fprintf(csv_stream, "%s%s", csv_list->field_list[i]->field,
+            (i != metadata->fields - 1) ? "," : "");
+  }
+
+  fprintf(csv_stream, "\n");
+
+  unsigned int row = 0;
+  unsigned int field = 0;
+  bool last_row = false;
+
+  /* -- Start from first row print all the values then go to next row and so
+   *    on until the last row */
+  while (1) {
+    for (int i = 0; i < metadata->fields; i++) {
+      unsigned current_row = 0;
+      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+
+      while (block != NULL) {
+        if (current_row == row) {
+          fprintf(csv_stream, "%s%s", block->data,
+                  (i != metadata->fields - 1) ? "," : "");
+          break;
+        }
+        current_row += 1;
+
+        block = block->next_block;
+
+        if (block == NULL) {
+          last_row = true;
+        }
+      }
+    }
+
+    row += 1;
+    fprintf(csv_stream, "\n");
+
+    if (last_row) {
+      break;
+    }
+  }
+
+  fclose(csv_stream);
 }
