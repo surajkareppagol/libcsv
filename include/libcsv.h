@@ -43,7 +43,25 @@ typedef struct csv_metadata {
 
 /************ API ************/
 
-void csv_field();
+/**
+ * @brief Extract data from a specific field
+ *
+ * @param field
+ * @param csv_list
+ * @param metadata
+ * @return CSV_FIELD_LIST*
+ */
+CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
+                          CSV_METADATA *metadata);
+
+/**
+ * @brief Import data from CSV file into a C Structure
+ *
+ * @param csv_file
+ * @param metadata
+ * @return CSV_LIST*
+ */
+CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 
 void csv_row();
 void csv_column();
@@ -51,7 +69,6 @@ void csv_column();
 void csv_add_data();
 void csv_remove_data();
 
-CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 void csv_export();
 
 #endif
