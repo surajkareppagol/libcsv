@@ -86,8 +86,9 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
  *
  * @param data
  * @param csv_file
+ * @param metadata
  */
-void csv_export(CSV_LIST *csv_list, char *csv_file);
+void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 
 void csv_row();
 void csv_column();
