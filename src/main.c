@@ -77,5 +77,21 @@ int main(int argc, char **argv) {
 
   csv_export(csv_list, NULL, metadata);
 
+  /************ csv_column() ************/
+
+  printf("\nExtracting first column...\n");
+
+  CSV_FIELD_LIST *first_column = csv_column(0, csv_list, metadata);
+
+  CSV_STRING_BLOCK *column = first_column->string_block_head;
+
+  while (column != NULL) {
+    printf("| %10s | ", column->data);
+
+    column = column->next_block;
+  }
+
+  printf("\n");
+
   return 0;
 }
