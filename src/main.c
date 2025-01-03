@@ -10,6 +10,8 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  /************ csv_import() ************/
+
   CSV_METADATA *metadata = NULL;
 
   CSV_LIST *csv_list = csv_import(argv[1], &metadata);
@@ -33,6 +35,22 @@ int main(int argc, char **argv) {
 
     printf("\n");
   }
+
+  /************ csv_field() ************/
+
+  printf("\nExtracting 'First name' field...\n");
+
+  CSV_FIELD_LIST *first_field = csv_field("First name", csv_list, metadata);
+
+  CSV_STRING_BLOCK *block = first_field->string_block_head;
+
+  while (block != NULL) {
+    printf("| %10s | ", block->data);
+
+    block = block->next_block;
+  }
+
+  printf("\n");
 
   return 0;
 }
