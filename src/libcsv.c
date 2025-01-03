@@ -162,3 +162,14 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
 
   fclose(csv_stream);
 }
+
+CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
+                           CSV_METADATA *metadata) {
+  for (int i = 0; i < metadata->fields; i++) {
+    if (i == column) {
+      return csv_list->field_list[i];
+    }
+  }
+
+  return NULL;
+}
