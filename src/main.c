@@ -93,5 +93,23 @@ int main(int argc, char **argv) {
 
   printf("\n");
 
+  /************ csv_add_row() ************/
+
+  printf("\nAdding data row...\n");
+
+  char *data[10] = {"booker12", "9012", "Rachel", "Booker"};
+
+  csv_add_row(data, csv_list, metadata);
+
+  csv_export(csv_list, NULL, metadata);
+
+  /************ csv_remove_row() ************/
+
+  printf("\nRemoving data row...\n");
+
+  csv_remove_row(2, csv_list, metadata);
+
+  csv_export(csv_list, NULL, metadata);
+
   return 0;
 }
