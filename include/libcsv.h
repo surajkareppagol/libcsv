@@ -62,17 +62,6 @@ typedef struct csv_metadata {
 /************ API ************/
 
 /**
- * @brief Extract data from a specific field
- *
- * @param field
- * @param csv_list
- * @param metadata
- * @return CSV_FIELD_LIST*
- */
-CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
-                          CSV_METADATA *metadata);
-
-/**
  * @brief Import data from CSV file into a C Structure
  *
  * @param csv_file
@@ -91,6 +80,17 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 
 /**
+ * @brief Extract data from a specific field
+ *
+ * @param field
+ * @param csv_list
+ * @param metadata
+ * @return CSV_FIELD_LIST*
+ */
+CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
+                          CSV_METADATA *metadata);
+
+/**
  * @brief Extract data from specific column.
  *
  * @param column
@@ -101,9 +101,24 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
                            CSV_METADATA *metadata);
 
-void csv_row();
+/**
+ * @brief Add a row of data.
+ *
+ * @param data
+ * @param metadata
+ */
+void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
-void csv_add_data();
-void csv_remove_data();
+/**
+ * @brief Remove a row of data.
+ *
+ * @param data
+ * @param csv_list
+ * @param metadata
+ */
+void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
+                    CSV_METADATA *metadata);
+
+void csv_row();
 
 #endif
