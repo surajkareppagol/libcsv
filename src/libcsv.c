@@ -94,17 +94,6 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   return csv_l;
 }
 
-CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
-                          CSV_METADATA *metadata) {
-  for (int i = 0; i < metadata->fields; i++) {
-    if (strcmp(field, csv_list->field_list[i]->field) == 0) {
-      return csv_list->field_list[i];
-    }
-  }
-
-  return NULL;
-}
-
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   char *csv_filename = calloc(1, CSV_FILE_NAME);
 
@@ -163,6 +152,17 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   fclose(csv_stream);
 }
 
+CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
+                          CSV_METADATA *metadata) {
+  for (int i = 0; i < metadata->fields; i++) {
+    if (strcmp(field, csv_list->field_list[i]->field) == 0) {
+      return csv_list->field_list[i];
+    }
+  }
+
+  return NULL;
+}
+
 CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
                            CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
@@ -172,4 +172,48 @@ CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
   }
 
   return NULL;
+}
+
+void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  for (int i = 0; i < metadata->fields; i++) {
+    CSV_STRING_BLOCK *block = calloc(1, sizeof(CSV_STRING_BLOCK));
+    block->next_block = NULL;
+    block->data = *(data + i);
+
+    csv_list->field_list[i]->string_block_tail->next_block = block;
+    csv_list->field_list[i]->string_block_tail = block;
+  }
+}
+
+void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
+                    CSV_METADATA *metadata) {
+  for (int i = 0; i < metadata->fields; i++) {
+    unsigned current_row = 0;
+    CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+    CSV_STRING_BLOCK *previous_block = block;
+
+    /* -- Remove first row */
+    if (row == 0) {
+      csv_list->field_list[i]->string_block_head = block->next_block;
+
+      free(block);
+      continue;
+    }
+
+    while (block != NULL) {
+      if (current_row == row) {
+        previous_block->next_block = block->next_block;
+
+        block->next_block = NULL;
+        free(block);
+
+        break;
+      }
+
+      previous_block = block;
+      block = block->next_block;
+
+      current_row += 1;
+    }
+  }
 }
