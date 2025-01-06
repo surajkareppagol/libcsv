@@ -14,6 +14,58 @@ make
 make build
 ```
 
+## ⚙️ API
+
+- Pass csv filename and the address of metadata structure. If file found it will
+extract the data and also fill up the metadata structure. Returns the pointer
+to the csv list.
+
+```c
+CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
+```
+
+---
+
+- Pass csv list and optional csv filename, also the metadata structure. A csv
+file will be created and the data from csv list will be populated.
+
+```c
+void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
+```
+
+---
+
+- Pass field string, csv list and metadata structure. If field found it will
+return the pointer to that block.
+
+```c
+CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
+---
+
+- Similar to `csv_field()`, but accepts column number (starts from 0).
+
+```c
+CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
+---
+
+- Add new row of data to csv list.
+
+```c
+void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
+---
+
+- Remove a row of data from csv list.
+
+```c
+void csv_remove_row(unsigned int row, CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
 ## 📦️ CSV Structures
 
 `libcsv` has 4 objects which define how the `CSV` data is stored in **C**.
@@ -23,6 +75,7 @@ make build
 ```c
 typedef struct csv_list {
   struct csv_field_list *field_list[CSV_MAX_FIELDS];
+
 } CSV_LIST;
 ```
 
@@ -33,8 +86,11 @@ blocks.
 typedef struct csv_field_list {
   char *field;
 
-  struct csv_string_block *string_block;
-  struct csv_numeric_block *numeric_block;
+  struct csv_string_block *string_block_head;
+  struct csv_numeric_block *numeric_block_head;
+
+  struct csv_string_block *string_block_tail;
+  struct csv_numeric_block *numeric_block_tail;
 } CSV_FIELD_LIST;
 ```
 
