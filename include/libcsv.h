@@ -107,7 +107,7 @@ CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
  * @param data
  * @param metadata
  */
-void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata);
+void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 /**
  * @brief Remove a row of data.
@@ -120,5 +120,13 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
                     CSV_METADATA *metadata);
 
 void csv_row();
+
+/**
+ * @brief Show CSV data on to the terminal.
+ *
+ * @param csv_list
+ * @param metadata
+ */
+void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 #endif
