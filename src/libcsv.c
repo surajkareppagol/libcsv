@@ -174,14 +174,26 @@ CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
   return NULL;
 }
 
-void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
-  for (int i = 0; i < metadata->fields; i++) {
+void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  char *token = strtok(data, CSV_DELIMETER);
+
+  unsigned int field = 0;
+
+  while (token != NULL) {
+    token = util_trim_string(token);
+
+    /* -- Extract data */
+
     CSV_STRING_BLOCK *block = calloc(1, sizeof(CSV_STRING_BLOCK));
     block->next_block = NULL;
-    block->data = *(data + i);
+    block->data = token;
 
-    csv_list->field_list[i]->string_block_tail->next_block = block;
-    csv_list->field_list[i]->string_block_tail = block;
+    csv_list->field_list[field]->string_block_tail->next_block = block;
+    csv_list->field_list[field]->string_block_tail = block;
+
+    field += 1;
+
+    token = strtok(NULL, CSV_DELIMETER);
   }
 }
 
@@ -214,6 +226,48 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
       block = block->next_block;
 
       current_row += 1;
+    }
+  }
+}
+
+void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  printf("\nCSV file has %d fields.\n\n", metadata->fields);
+
+  for (int i = 0; i < metadata->fields; i++) {
+    printf("| %10s | ", csv_list->field_list[i]->field);
+  }
+
+  printf("\n\n");
+
+  unsigned int row = 0;
+  unsigned int field = 0;
+  bool last_row = false;
+
+  while (1) {
+    for (int i = 0; i < metadata->fields; i++) {
+      unsigned current_row = 0;
+      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+
+      while (block != NULL) {
+        if (current_row == row) {
+          printf("| %10s | ", block->data);
+          break;
+        }
+        current_row += 1;
+
+        block = block->next_block;
+
+        if (block == NULL) {
+          last_row = true;
+        }
+      }
+    }
+
+    row += 1;
+    printf("\n");
+
+    if (last_row) {
+      break;
     }
   }
 }
