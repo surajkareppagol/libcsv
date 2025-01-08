@@ -1,3 +1,15 @@
+/**
+ * @file util.c
+ * @author Suraj Kareppagol (surajkareppagol.dev@gmail.com)
+ * @brief Utility functions for libcsv
+ *
+ * @version 0.1
+ * @date 2025-01-08
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
