@@ -1,6 +1,6 @@
 # 📊 libcsv
 
-Yet another library for CSV files. It is a single header file `libcsv.h`.
+Yet another library for CSV files.
 
 ## ⚙️ Build
 
@@ -11,14 +11,18 @@ make
 ```
 
 ```sh
-make build
+libcsv -i user.csv -a "a, b, c" -e
 ```
+
+- `-i`, Import CSV data into a C Object
+- `-a`, Append data to CSV
+- `-e`, Export C Object to CSV data
 
 ## ⚙️ API
 
 - Pass csv filename and the address of metadata structure. If file found it will
-extract the data and also fill up the metadata structure. Returns the pointer
-to the csv list.
+  extract the data and also fill up the metadata structure. Returns the pointer
+  to the csv list.
 
 ```c
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
@@ -27,7 +31,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 ---
 
 - Pass csv list and optional csv filename, also the metadata structure. A csv
-file will be created and the data from csv list will be populated.
+  file will be created and the data from csv list will be populated.
 
 ```c
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
@@ -36,7 +40,7 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 ---
 
 - Pass field string, csv list and metadata structure. If field found it will
-return the pointer to that block.
+  return the pointer to that block.
 
 ```c
 CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata);
@@ -64,6 +68,14 @@ void csv_add_row(char **data, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 ```c
 void csv_remove_row(unsigned int row, CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
+---
+
+- Display CSV data on to the terminal.
+
+```c
+void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata);
 ```
 
 ## 📦️ CSV Structures
