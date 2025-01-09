@@ -59,3 +59,31 @@ char *util_trim_string(char *string) {
 
   return trimmed_string;
 }
+
+int util_string_to_number(char *string, int *data) {
+  char *characters;
+
+  *data = strtol(string, &characters, 10);
+
+  if (*characters != '\0') {
+    return -1;
+  }
+
+  return 0;
+}
+
+int util_string_to_double(char *string, double *data) {
+  if (strstr(string, ".") == NULL) {
+    return -1;
+  }
+
+  char *characters;
+
+  *data = strtod(string, &characters);
+
+  if (*characters != '\0') {
+    return -1;
+  }
+
+  return 0;
+}
