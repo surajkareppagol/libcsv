@@ -26,7 +26,7 @@
 
 #include <stdbool.h>
 
-/************ Data Structures ************/
+/************ TYPE BLOCKS ************/
 
 typedef struct csv_char_block {
   struct csv_char_block *next_block;
@@ -46,11 +46,9 @@ typedef struct csv_double_block {
   double data;
 } CSV_DOUBLE_BLOCK;
 
-typedef struct csv_field_type {
-  bool int_type : 1;
-  bool char_type : 1;
-  bool double_type : 1;
-} CSV_FIELD_TYPE;
+/************ FIELD BLOCK ************/
+
+typedef enum { CHAR_TYPE, INT_TYPE, DOUBLE_TYPE } CSV_FIELD_TYPE;
 
 typedef struct csv_field_list {
   char *field;
@@ -67,13 +65,15 @@ typedef struct csv_field_list {
   struct csv_double_block *double_block_tail;
 } CSV_FIELD_LIST;
 
-/* Top node -> csv_field_list */
+/************ TOP BLOCK ************/
+
 typedef struct csv_list {
   struct csv_field_list *field_list[CSV_MAX_FIELDS];
 
 } CSV_LIST;
 
-/* -- Metadata */
+/************ METADATA BLOCK ************/
+
 typedef struct csv_metadata {
   unsigned fields;
   unsigned items;
