@@ -21,47 +21,117 @@
 #include <libcsv.h>
 #include <util.h>
 
+/************ CSV UTILS ************/
+
+/* TODO: Refactor code */
+void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
+                       CSV_FIELD_TYPE csv_field_type) {
+
+  switch (csv_field_type) {
+  case CHAR_TYPE: {
+    CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
+
+    block->next_block = NULL;
+    block->data = (char *)data;
+
+    /* -- Add node */
+
+    CSV_CHAR_BLOCK **head = &csv_list->field_list[field]->char_block_head;
+    CSV_CHAR_BLOCK **tail = &csv_list->field_list[field]->char_block_tail;
+
+    if (*head == NULL) {
+      *head = block;
+      *tail = block;
+    } else {
+      (*tail)->next_block = block;
+      *tail = block;
+    }
+
+    break;
+  }
+  case INT_TYPE: {
+    CSV_INT_BLOCK *block = (CSV_INT_BLOCK *)calloc(1, sizeof(CSV_INT_BLOCK));
+
+    block->next_block = NULL;
+    block->data = *((int *)data);
+
+    /* -- Add node */
+
+    CSV_INT_BLOCK **head = &csv_list->field_list[field]->int_block_head;
+    CSV_INT_BLOCK **tail = &csv_list->field_list[field]->int_block_tail;
+
+    if (*head == NULL) {
+      *head = block;
+      *tail = block;
+    } else {
+      (*tail)->next_block = block;
+      *tail = block;
+    }
+
+    break;
+  }
+  case DOUBLE_TYPE: {
+    CSV_DOUBLE_BLOCK *block =
+        (CSV_DOUBLE_BLOCK *)calloc(1, sizeof(CSV_DOUBLE_BLOCK));
+
+    block->next_block = NULL;
+    block->data = *((double *)data);
+
+    /* -- Add node */
+
+    CSV_DOUBLE_BLOCK **head = &csv_list->field_list[field]->double_block_head;
+    CSV_DOUBLE_BLOCK **tail = &csv_list->field_list[field]->double_block_tail;
+
+    if (*head == NULL) {
+      *head = block;
+      *tail = block;
+    } else {
+      (*tail)->next_block = block;
+      *tail = block;
+    }
+
+    break;
+  }
+  }
+}
+
+/************ LIBCSV ************/
+
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   FILE *csv_stream = fopen(csv_file, "r");
 
-  bool metadata_extracted = false;
   bool fields_extracted = false;
 
-  if (metadata != NULL || *metadata != NULL) {
-    metadata_extracted = true;
+  int total_fields = 0;
+  int total_items = 0;
+
+  /* -- Prepare for metadata extraction */
+  if (metadata == NULL) {
+    return NULL;
   }
 
-  if (metadata_extracted) {
-    *metadata = calloc(1, sizeof(CSV_METADATA));
-    (*metadata)->fields = 0;
-  }
-
-  CSV_LIST *csv_l = calloc(1, sizeof(CSV_LIST));
+  CSV_LIST *csv_list = calloc(1, sizeof(CSV_LIST));
 
   char csv_buffer[CSV_BUFFER_SIZE];
-
   memset(csv_buffer, 0, CSV_BUFFER_SIZE);
 
   while (fgets(csv_buffer, CSV_BUFFER_SIZE, csv_stream) != NULL) {
-    /* -- First line - All fields are available */
+    /* -- First extract all fields */
     char *token = strtok(csv_buffer, CSV_DELIMETER);
 
-    unsigned int field = 0;
+    unsigned field = 0;
 
     while (token != NULL) {
       token = util_trim_string(token);
 
-      if (metadata_extracted) {
-        (*metadata)->fields += 1;
-      }
-
       /* -- Extract fields */
       if (fields_extracted == false) {
-        csv_l->field_list[field] = calloc(1, sizeof(CSV_FIELD_LIST));
-        csv_l->field_list[field]->field = token;
+        csv_list->field_list[field] = calloc(1, sizeof(CSV_FIELD_LIST));
+        csv_list->field_list[field]->field = token;
 
         token = strtok(NULL, CSV_DELIMETER);
         field += 1;
+        total_fields += 1;
 
         continue;
       }
@@ -71,55 +141,18 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 
       /* -- Extract double data */
       if (util_string_to_double(token, &double_type) == 0) {
-        csv_l->field_list[field]->field_type.double_type = true;
-
-        CSV_DOUBLE_BLOCK *block = calloc(1, sizeof(CSV_DOUBLE_BLOCK));
-
-        block->next_block = NULL;
-        block->data = double_type;
-
-        if (csv_l->field_list[field]->double_block_head == NULL) {
-          csv_l->field_list[field]->double_block_head = block;
-          csv_l->field_list[field]->double_block_tail = block;
-        } else {
-          csv_l->field_list[field]->double_block_tail->next_block = block;
-          csv_l->field_list[field]->double_block_tail = block;
-        }
+        csv_list->field_list[field]->field_type = DOUBLE_TYPE;
+        csv_util_add_node(csv_list, field, &double_type, DOUBLE_TYPE);
       }
-
       /* -- Extract integer data */
       else if (util_string_to_number(token, &int_type) == 0) {
-        csv_l->field_list[field]->field_type.int_type = true;
-
-        CSV_INT_BLOCK *block = calloc(1, sizeof(CSV_INT_BLOCK));
-
-        block->next_block = NULL;
-        block->data = int_type;
-
-        if (csv_l->field_list[field]->int_block_head == NULL) {
-          csv_l->field_list[field]->int_block_head = block;
-          csv_l->field_list[field]->int_block_tail = block;
-        } else {
-          csv_l->field_list[field]->int_block_tail->next_block = block;
-          csv_l->field_list[field]->int_block_tail = block;
-        }
+        csv_list->field_list[field]->field_type = INT_TYPE;
+        csv_util_add_node(csv_list, field, &int_type, INT_TYPE);
       }
-
       /* -- Extract string data */
       else {
-        csv_l->field_list[field]->field_type.char_type = true;
-
-        CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
-        block->next_block = NULL;
-        block->data = token;
-
-        if (csv_l->field_list[field]->char_block_head == NULL) {
-          csv_l->field_list[field]->char_block_head = block;
-          csv_l->field_list[field]->char_block_tail = block;
-        } else {
-          csv_l->field_list[field]->char_block_tail->next_block = block;
-          csv_l->field_list[field]->char_block_tail = block;
-        }
+        csv_list->field_list[field]->field_type = CHAR_TYPE;
+        csv_util_add_node(csv_list, field, token, CHAR_TYPE);
       }
 
       field += 1;
@@ -127,13 +160,19 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
       token = strtok(NULL, CSV_DELIMETER);
     }
 
+    total_items += 1;
+
     fields_extracted = true;
-    metadata_extracted = false;
   }
+
+  *metadata = calloc(1, sizeof(CSV_METADATA));
+
+  (*metadata)->fields = total_fields;
+  (*metadata)->items = total_items - 1;
 
   fclose(csv_stream);
 
-  return csv_l;
+  return csv_list;
 }
 
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
@@ -272,90 +311,80 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
   }
 }
 
+/* TODO: Refactor code */
 void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
-  printf("\nCSV file has %d fields.\n\n", metadata->fields);
+  printf("+----------+\n"
+         "| CSV INFO |\n"
+         "+----------+\n");
 
+  printf("\n"
+         "+ Fields            : %d\n"
+         "+ Items Per Columns : %d\n\n",
+         metadata->fields, metadata->items);
+
+  /* -- Print the field names */
   for (int i = 0; i < metadata->fields; i++) {
     printf("| %10s | ", csv_list->field_list[i]->field);
-
-    printf("CHAR: %d, ", csv_list->field_list[i]->field_type.char_type);
-    printf("DOUBLE: %d, ", csv_list->field_list[i]->field_type.double_type);
-    printf("INT: %d\n", csv_list->field_list[i]->field_type.int_type);
   }
 
   printf("\n\n");
 
   unsigned int row = 0;
   unsigned int field = 0;
-  bool last_row = false;
 
-  while (1) {
-    for (int i = 0; i < metadata->fields; i++) {
+  for (int i = 0; i < metadata->items + 1; i++) {
+    for (int j = 0; j < metadata->fields; j++) {
       unsigned current_row = 0;
-      CSV_CHAR_BLOCK *char_block = NULL;
-      CSV_INT_BLOCK *int_block = NULL;
-      CSV_DOUBLE_BLOCK *double_block = NULL;
 
-      CSV_FIELD_TYPE field_type;
+      CSV_FIELD_TYPE field_type = csv_list->field_list[j]->field_type;
 
-      if (csv_list->field_list[i]->field_type.char_type) {
-        char_block = csv_list->field_list[i]->char_block_head;
+      switch (field_type) {
+      case CHAR_TYPE: {
+        CSV_CHAR_BLOCK *block = csv_list->field_list[j]->char_block_head;
 
-        while (char_block != NULL) {
+        for (int k = 0; k < metadata->items; k++) {
           if (current_row == row) {
-            printf("| %10s | ", char_block->data);
+            printf("| %10s | ", block->data);
             break;
           }
           current_row += 1;
 
-          char_block = char_block->next_block;
-
-          if (char_block == NULL) {
-            last_row = true;
-          }
+          block = block->next_block;
         }
-      } else if (csv_list->field_list[i]->field_type.int_type) {
+        break;
+      }
+      case INT_TYPE: {
+        CSV_INT_BLOCK *block = csv_list->field_list[j]->int_block_head;
 
-        int_block = csv_list->field_list[i]->int_block_head;
-
-        while (int_block != NULL) {
+        for (int k = 0; k < metadata->items; k++) {
           if (current_row == row) {
-            printf("| %10d | ", int_block->data);
+            printf("| %10d | ", block->data);
             break;
           }
           current_row += 1;
 
-          int_block = int_block->next_block;
-
-          if (int_block == NULL) {
-            last_row = true;
-          }
+          block = block->next_block;
         }
-      } else {
+        break;
+      }
+      case DOUBLE_TYPE: {
+        CSV_DOUBLE_BLOCK *block = csv_list->field_list[j]->double_block_head;
 
-        double_block = csv_list->field_list[i]->double_block_head;
-
-        while (double_block != NULL) {
+        for (int k = 0; k < metadata->items; k++) {
           if (current_row == row) {
-            printf("| %10lf | ", double_block->data);
+            printf("| %10lf | ", block->data);
             break;
           }
           current_row += 1;
 
-          double_block = double_block->next_block;
-
-          if (double_block == NULL) {
-            last_row = true;
-          }
+          block = block->next_block;
         }
+        break;
+      }
       }
     }
 
     row += 1;
     printf("\n");
-
-    if (last_row) {
-      break;
-    }
   }
 }
