@@ -66,18 +66,60 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
         continue;
       }
 
-      /* -- Extract data */
+      int int_type = 0;
+      double double_type = 0;
 
-      CSV_STRING_BLOCK *block = calloc(1, sizeof(CSV_STRING_BLOCK));
-      block->next_block = NULL;
-      block->data = token;
+      /* -- Extract double data */
+      if (util_string_to_double(token, &double_type) == 0) {
+        csv_l->field_list[field]->field_type.double_type = true;
 
-      if (csv_l->field_list[field]->string_block_head == NULL) {
-        csv_l->field_list[field]->string_block_head = block;
-        csv_l->field_list[field]->string_block_tail = block;
-      } else {
-        csv_l->field_list[field]->string_block_tail->next_block = block;
-        csv_l->field_list[field]->string_block_tail = block;
+        CSV_DOUBLE_BLOCK *block = calloc(1, sizeof(CSV_DOUBLE_BLOCK));
+
+        block->next_block = NULL;
+        block->data = double_type;
+
+        if (csv_l->field_list[field]->double_block_head == NULL) {
+          csv_l->field_list[field]->double_block_head = block;
+          csv_l->field_list[field]->double_block_tail = block;
+        } else {
+          csv_l->field_list[field]->double_block_tail->next_block = block;
+          csv_l->field_list[field]->double_block_tail = block;
+        }
+      }
+
+      /* -- Extract integer data */
+      else if (util_string_to_number(token, &int_type) == 0) {
+        csv_l->field_list[field]->field_type.int_type = true;
+
+        CSV_INT_BLOCK *block = calloc(1, sizeof(CSV_INT_BLOCK));
+
+        block->next_block = NULL;
+        block->data = int_type;
+
+        if (csv_l->field_list[field]->int_block_head == NULL) {
+          csv_l->field_list[field]->int_block_head = block;
+          csv_l->field_list[field]->int_block_tail = block;
+        } else {
+          csv_l->field_list[field]->int_block_tail->next_block = block;
+          csv_l->field_list[field]->int_block_tail = block;
+        }
+      }
+
+      /* -- Extract string data */
+      else {
+        csv_l->field_list[field]->field_type.char_type = true;
+
+        CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
+        block->next_block = NULL;
+        block->data = token;
+
+        if (csv_l->field_list[field]->char_block_head == NULL) {
+          csv_l->field_list[field]->char_block_head = block;
+          csv_l->field_list[field]->char_block_tail = block;
+        } else {
+          csv_l->field_list[field]->char_block_tail->next_block = block;
+          csv_l->field_list[field]->char_block_tail = block;
+        }
       }
 
       field += 1;
@@ -123,7 +165,7 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   while (1) {
     for (int i = 0; i < metadata->fields; i++) {
       unsigned current_row = 0;
-      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+      CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
 
       while (block != NULL) {
         if (current_row == row) {
@@ -184,12 +226,12 @@ void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
 
     /* -- Extract data */
 
-    CSV_STRING_BLOCK *block = calloc(1, sizeof(CSV_STRING_BLOCK));
+    CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
     block->next_block = NULL;
     block->data = token;
 
-    csv_list->field_list[field]->string_block_tail->next_block = block;
-    csv_list->field_list[field]->string_block_tail = block;
+    csv_list->field_list[field]->char_block_tail->next_block = block;
+    csv_list->field_list[field]->char_block_tail = block;
 
     field += 1;
 
@@ -201,12 +243,12 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
                     CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
     unsigned current_row = 0;
-    CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
-    CSV_STRING_BLOCK *previous_block = block;
+    CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
+    CSV_CHAR_BLOCK *previous_block = block;
 
     /* -- Remove first row */
     if (row == 0) {
-      csv_list->field_list[i]->string_block_head = block->next_block;
+      csv_list->field_list[i]->char_block_head = block->next_block;
 
       free(block);
       continue;
@@ -235,6 +277,10 @@ void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
 
   for (int i = 0; i < metadata->fields; i++) {
     printf("| %10s | ", csv_list->field_list[i]->field);
+
+    printf("CHAR: %d, ", csv_list->field_list[i]->field_type.char_type);
+    printf("DOUBLE: %d, ", csv_list->field_list[i]->field_type.double_type);
+    printf("INT: %d\n", csv_list->field_list[i]->field_type.int_type);
   }
 
   printf("\n\n");
@@ -246,19 +292,61 @@ void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
   while (1) {
     for (int i = 0; i < metadata->fields; i++) {
       unsigned current_row = 0;
-      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+      CSV_CHAR_BLOCK *char_block = NULL;
+      CSV_INT_BLOCK *int_block = NULL;
+      CSV_DOUBLE_BLOCK *double_block = NULL;
 
-      while (block != NULL) {
-        if (current_row == row) {
-          printf("| %10s | ", block->data);
-          break;
+      CSV_FIELD_TYPE field_type;
+
+      if (csv_list->field_list[i]->field_type.char_type) {
+        char_block = csv_list->field_list[i]->char_block_head;
+
+        while (char_block != NULL) {
+          if (current_row == row) {
+            printf("| %10s | ", char_block->data);
+            break;
+          }
+          current_row += 1;
+
+          char_block = char_block->next_block;
+
+          if (char_block == NULL) {
+            last_row = true;
+          }
         }
-        current_row += 1;
+      } else if (csv_list->field_list[i]->field_type.int_type) {
 
-        block = block->next_block;
+        int_block = csv_list->field_list[i]->int_block_head;
 
-        if (block == NULL) {
-          last_row = true;
+        while (int_block != NULL) {
+          if (current_row == row) {
+            printf("| %10d | ", int_block->data);
+            break;
+          }
+          current_row += 1;
+
+          int_block = int_block->next_block;
+
+          if (int_block == NULL) {
+            last_row = true;
+          }
+        }
+      } else {
+
+        double_block = csv_list->field_list[i]->double_block_head;
+
+        while (double_block != NULL) {
+          if (current_row == row) {
+            printf("| %10lf | ", double_block->data);
+            break;
+          }
+          current_row += 1;
+
+          double_block = double_block->next_block;
+
+          if (double_block == NULL) {
+            last_row = true;
+          }
         }
       }
     }
