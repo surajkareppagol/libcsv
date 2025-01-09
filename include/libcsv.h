@@ -24,28 +24,47 @@
 
 #define CSV_DEFAULT_FILE_NAME "output.csv"
 
+#include <stdbool.h>
+
 /************ Data Structures ************/
 
-typedef struct csv_string_block {
-  struct csv_string_block *next_block;
+typedef struct csv_char_block {
+  struct csv_char_block *next_block;
 
   char *data;
-} CSV_STRING_BLOCK;
+} CSV_CHAR_BLOCK;
 
-typedef struct csv_numeric_block {
-  struct csv_numeric_block *next_block;
+typedef struct csv_int_block {
+  struct csv_int_block *next_block;
 
   int data;
-} CSV_NUMERIC_BLOCK;
+} CSV_INT_BLOCK;
+
+typedef struct csv_double_block {
+  struct csv_double_block *next_block;
+
+  double data;
+} CSV_DOUBLE_BLOCK;
+
+typedef struct csv_field_type {
+  bool int_type : 1;
+  bool char_type : 1;
+  bool double_type : 1;
+} CSV_FIELD_TYPE;
 
 typedef struct csv_field_list {
   char *field;
 
-  struct csv_string_block *string_block_head;
-  struct csv_numeric_block *numeric_block_head;
+  CSV_FIELD_TYPE field_type;
 
-  struct csv_string_block *string_block_tail;
-  struct csv_numeric_block *numeric_block_tail;
+  struct csv_char_block *char_block_head;
+  struct csv_char_block *char_block_tail;
+
+  struct csv_int_block *int_block_head;
+  struct csv_int_block *int_block_tail;
+
+  struct csv_double_block *double_block_head;
+  struct csv_double_block *double_block_tail;
 } CSV_FIELD_LIST;
 
 /* Top node -> csv_field_list */
@@ -56,7 +75,8 @@ typedef struct csv_list {
 
 /* -- Metadata */
 typedef struct csv_metadata {
-  unsigned int fields;
+  unsigned fields;
+  unsigned items;
 } CSV_METADATA;
 
 /************ API ************/
