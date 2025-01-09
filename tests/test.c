@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   while (1) {
     for (int i = 0; i < metadata->fields; i++) {
       unsigned current_row = 0;
-      CSV_STRING_BLOCK *block = csv_list->field_list[i]->string_block_head;
+      CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
 
       while (block != NULL) {
         if (current_row == row) {
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
   CSV_FIELD_LIST *first_field = csv_field("First name", csv_list, metadata);
 
-  CSV_STRING_BLOCK *block = first_field->string_block_head;
+  CSV_CHAR_BLOCK *block = first_field->char_block_head;
 
   while (block != NULL) {
     printf("| %10s | ", block->data);
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 
   CSV_FIELD_LIST *first_column = csv_column(0, csv_list, metadata);
 
-  CSV_STRING_BLOCK *column = first_column->string_block_head;
+  CSV_CHAR_BLOCK *column = first_column->char_block_head;
 
   while (column != NULL) {
     printf("| %10s | ", column->data);
