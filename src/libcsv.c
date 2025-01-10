@@ -195,39 +195,67 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
 
   fprintf(csv_stream, "\n");
 
+  /* -- Print remaining data */
   unsigned int row = 0;
   unsigned int field = 0;
-  bool last_row = false;
 
-  /* -- Start from first row print all the values then go to next row and so
-   *    on until the last row */
-  while (1) {
-    for (int i = 0; i < metadata->fields; i++) {
+  for (int i = 0; i < metadata->items; i++) {
+    for (int j = 0; j < metadata->fields; j++) {
       unsigned current_row = 0;
-      CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
 
-      while (block != NULL) {
-        if (current_row == row) {
-          fprintf(csv_stream, "%s%s", block->data,
-                  (i != metadata->fields - 1) ? "," : "");
-          break;
+      CSV_FIELD_TYPE field_type = csv_list->field_list[j]->field_type;
+
+      switch (field_type) {
+      case CHAR_TYPE: {
+        CSV_CHAR_BLOCK *block = csv_list->field_list[j]->char_block_head;
+
+        for (int k = 0; k < metadata->items; k++) {
+          if (current_row == row) {
+            fprintf(csv_stream, "%s%s", block->data,
+                    (j != metadata->fields - 1) ? "," : "");
+            break;
+          }
+          current_row += 1;
+
+          block = block->next_block;
         }
-        current_row += 1;
+        break;
+      }
+      case INT_TYPE: {
+        CSV_INT_BLOCK *block = csv_list->field_list[j]->int_block_head;
 
-        block = block->next_block;
+        for (int k = 0; k < metadata->items; k++) {
+          if (current_row == row) {
+            fprintf(csv_stream, "%d%s", block->data,
+                    (j != metadata->fields - 1) ? "," : "");
+            break;
+          }
+          current_row += 1;
 
-        if (block == NULL) {
-          last_row = true;
+          block = block->next_block;
         }
+        break;
+      }
+      case DOUBLE_TYPE: {
+        CSV_DOUBLE_BLOCK *block = csv_list->field_list[j]->double_block_head;
+
+        for (int k = 0; k < metadata->items; k++) {
+          if (current_row == row) {
+            fprintf(csv_stream, "%.2lf%s", block->data,
+                    (j != metadata->fields - 1) ? "," : "");
+            break;
+          }
+          current_row += 1;
+
+          block = block->next_block;
+        }
+        break;
+      }
       }
     }
 
     row += 1;
     fprintf(csv_stream, "\n");
-
-    if (last_row) {
-      break;
-    }
   }
 
   fclose(csv_stream);
@@ -332,7 +360,7 @@ void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
   unsigned int row = 0;
   unsigned int field = 0;
 
-  for (int i = 0; i < metadata->items + 1; i++) {
+  for (int i = 0; i < metadata->items; i++) {
     for (int j = 0; j < metadata->fields; j++) {
       unsigned current_row = 0;
 
