@@ -21,7 +21,9 @@
 #include <libcsv.h>
 #include <util.h>
 
-/************ CSV UTILS ************/
+/************************************************/
+/*             CSV_UTIL_ADD_NODE                */
+/************************************************/
 
 /* TODO: Refactor code */
 void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
@@ -94,6 +96,10 @@ void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
   }
   }
 }
+
+/************************************************/
+/*             CSV_UTIL_SHOW                    */
+/************************************************/
 
 void csv_util_show(CSV_LIST *csv_list, FILE *csv_stream,
                    CSV_METADATA *metadata) {
@@ -169,7 +175,9 @@ void csv_util_show(CSV_LIST *csv_list, FILE *csv_stream,
   }
 }
 
-/************ LIBCSV ************/
+/************************************************/
+/*             CSV_IMPORT                       */
+/************************************************/
 
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   FILE *csv_stream = fopen(csv_file, "r");
@@ -249,6 +257,10 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   return csv_list;
 }
 
+/************************************************/
+/*             CSV_EXPORT                       */
+/************************************************/
+
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   char *csv_filename = calloc(1, CSV_FILE_NAME);
 
@@ -267,6 +279,10 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   fclose(csv_stream);
 }
 
+/************************************************/
+/*             CSV_FIELD                       */
+/************************************************/
+
 CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
                           CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
@@ -278,6 +294,10 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
   return NULL;
 }
 
+/************************************************/
+/*             CSV_COLUMN                       */
+/************************************************/
+
 CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
                            CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
@@ -288,6 +308,10 @@ CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
 
   return NULL;
 }
+
+/************************************************/
+/*             CSV_ADD_ROW                      */
+/************************************************/
 
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
   char *token = strtok(data, CSV_DELIMETER);
@@ -311,6 +335,10 @@ void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
     token = strtok(NULL, CSV_DELIMETER);
   }
 }
+
+/************************************************/
+/*             CSV_REMOVE_ROW                   */
+/************************************************/
 
 void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
                     CSV_METADATA *metadata) {
@@ -344,6 +372,10 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
     }
   }
 }
+
+/************************************************/
+/*             CSV_SHOW                         */
+/************************************************/
 
 /* TODO: Refactor code */
 void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
