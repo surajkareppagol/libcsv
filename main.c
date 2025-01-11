@@ -14,8 +14,21 @@
 #include <unistd.h>
 
 #include <libcsv.h>
+#include <util.h>
 
-#define LIBCSV_ARGS "i:a:e"
+#define LIBCSV_ARGS "i:a:r:ep"
+
+void csv_print_help(char *binary) {
+  fprintf(stderr,
+          "Usage: %s -i [file] -a [data] -e"
+          "\n-i = Import CSV data into C object"
+          "\n-a = Append a row of data"
+          "\n-r = Remove a row of data"
+          "\n-e = Export C object into CSV file"
+          "\n-p = Print data"
+          "\n",
+          binary);
+}
 
 int main(int argc, char **argv) {
   int opt;
@@ -25,24 +38,42 @@ int main(int argc, char **argv) {
 
   while ((opt = getopt(argc, argv, LIBCSV_ARGS)) != -1) {
     switch (opt) {
-    case 'i':
+    case 'i': {
       csv_list = csv_import(optarg, &metadata);
-      csv_show(csv_list, metadata);
       break;
-    case 'a':
+    }
+    case 'a': {
       csv_add_row(optarg, csv_list, metadata);
       break;
-    case 'e':
+    }
+    case 'r': {
+      int row = 0;
+      if ((util_string_to_number(optarg, &row) == 0) &&
+          (row < metadata->items)) {
+        csv_remove_row(row, csv_list, metadata);
+        break;
+      }
+
+      fprintf(stderr,
+              "Error: Invalid argument %s for"
+              " option -r.\n",
+              optarg);
+
+      break;
+    }
+    case 'e': {
       csv_export(csv_list, NULL, metadata);
       break;
-    default:
-      fprintf(stderr,
-              "Usage: %s -i [file] -a [data] -e"
-              "\n-i = Import CSV data into C object"
-              "\n-a = Append a row of data"
-              "\n-e = Export C object into CSV file"
-              "\n",
-              argv[0]);
+    }
+    case 'p': {
+      csv_show(csv_list, metadata);
+      break;
+    }
+    default: {
+      csv_print_help(argv[0]);
+    }
     }
   }
+
+  return 0;
 }
