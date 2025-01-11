@@ -2,7 +2,7 @@
 
 Yet another library for CSV files.
 
-## ⚙️ Build
+## ⚙️ Build Executable
 
 Build and run the example.
 
@@ -16,6 +16,19 @@ libcsv [options...]
 
 ```sh
 libcsv -i users.csv -a "user,2002,admin,new" -p -e
+```
+
+## 📦️ Build Static Library
+
+```sh
+make lib
+```
+
+The static library `libcsv.a` is created under `lib/`. Build a application
+using this static library with the following command.
+
+```sh
+gcc -I./include csv_application.c -L./lib/ -lcsv
 ```
 
 ## ➡️ Available Options
