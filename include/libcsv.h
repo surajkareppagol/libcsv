@@ -105,10 +105,9 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
  * @param field
  * @param csv_list
  * @param metadata
- * @return CSV_FIELD_LIST*
+ * @return void*
  */
-CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
-                          CSV_METADATA *metadata);
+void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 /**
  * @brief Extract data from specific column.
@@ -116,10 +115,10 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
  * @param column
  * @param csv_list
  * @param metadata
- * @return CSV_FIELD_LIST*
+ * @return void*
  */
-CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
-                           CSV_METADATA *metadata);
+void *csv_column(unsigned int column, CSV_LIST *csv_list,
+                 CSV_METADATA *metadata);
 
 /**
  * @brief Add a row of data.
