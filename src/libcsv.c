@@ -113,7 +113,6 @@ void csv_util_show(CSV_LIST *csv_list, FILE *csv_stream,
 
   /* -- Print remaining data */
   unsigned int row = 0;
-  unsigned int field = 0;
 
   for (int i = 0; i < metadata->items; i++) {
     for (int j = 0; j < metadata->fields; j++) {
@@ -181,6 +180,10 @@ void csv_util_show(CSV_LIST *csv_list, FILE *csv_stream,
 
 CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   FILE *csv_stream = fopen(csv_file, "r");
+
+  if (csv_stream == NULL) {
+    return NULL;
+  }
 
   bool fields_extracted = false;
 
@@ -262,16 +265,14 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 /************************************************/
 
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
-  char *csv_filename = calloc(1, CSV_FILE_NAME);
+  FILE *csv_stream;
 
   /* -- Get CSV file name */
   if (csv_file == NULL) {
-    strncpy(csv_filename, CSV_DEFAULT_FILE_NAME, strlen(CSV_DEFAULT_FILE_NAME));
+    csv_stream = fopen(CSV_DEFAULT_FILE_NAME, "w");
   } else {
-    strncpy(csv_filename, csv_file, strlen(csv_file));
+    csv_stream = fopen(csv_file, "w");
   }
-
-  FILE *csv_stream = fopen(csv_filename, "w");
 
   /* -- Save data to a file */
   csv_util_show(csv_list, csv_stream, metadata);
@@ -392,6 +393,7 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
       if (row == 0) {
         csv_list->field_list[i]->char_block_head = block->next_block;
 
+        free(block->data);
         free(block);
         continue;
       }
@@ -401,6 +403,7 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
           previous_block->next_block = block->next_block;
 
           block->next_block = NULL;
+          free(block->data);
           free(block);
 
           break;
@@ -490,4 +493,72 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
 void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
   /* -- Print data to terminal */
   csv_util_show(csv_list, stdout, metadata);
+}
+
+/************************************************/
+/*             CSV_CLEAR                        */
+/************************************************/
+
+void csv_clear(CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  for (int i = 0; i < metadata->fields; i++) {
+    CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
+
+    switch (field_type) {
+    case CHAR_TYPE: {
+      CSV_CHAR_BLOCK *next_block = csv_list->field_list[i]->char_block_head;
+      CSV_CHAR_BLOCK *current_block = next_block;
+
+      for (int j = 0; j < metadata->items; j++) {
+        next_block = current_block->next_block;
+
+        free(current_block->data);
+        free(current_block);
+
+        current_block = next_block;
+      }
+
+      csv_list->field_list[i]->char_block_head = NULL;
+
+      break;
+    }
+    case INT_TYPE: {
+      CSV_INT_BLOCK *next_block = csv_list->field_list[i]->int_block_head;
+      CSV_INT_BLOCK *current_block = next_block;
+
+      for (int j = 0; j < metadata->items; j++) {
+        next_block = current_block->next_block;
+
+        free(current_block);
+
+        current_block = next_block;
+      }
+
+      csv_list->field_list[i]->int_block_head = NULL;
+
+      break;
+    }
+    case DOUBLE_TYPE: {
+      CSV_DOUBLE_BLOCK *next_block = csv_list->field_list[i]->double_block_head;
+      CSV_DOUBLE_BLOCK *current_block = next_block;
+
+      for (int j = 0; j < metadata->items; j++) {
+        next_block = current_block->next_block;
+
+        free(current_block);
+
+        current_block = next_block;
+      }
+
+      csv_list->field_list[i]->double_block_head = NULL;
+
+      break;
+    }
+    }
+
+    free(csv_list->field_list[i]->field);
+    free(csv_list->field_list[i]);
+  }
+
+  free(csv_list);
+  free(metadata);
 }
