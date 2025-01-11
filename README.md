@@ -56,7 +56,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
 ### 2. CSV_EXPORT
 
 Pass csv list and optional csv filename, also the metadata structure. A csv
-file will be created and the data from csv list will be populated.
+file will be created and the data from CSV list will be populated.
 
 ```c
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
@@ -64,8 +64,8 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 
 ### 3. CSV_FIELD
 
-Pass field string, csv list and metadata structure. If field found it will
-return the pointer to that block.
+Pass field string, CSV list and metadata structure. If field found it will
+return the pointer to the type block.
 
 ```c
 void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata);
@@ -81,7 +81,7 @@ void *csv_column(unsigned int column, CSV_LIST *csv_list, CSV_METADATA *metadata
 
 ### 5. CSV_ADD_ROW
 
-Add new row of data to csv list.
+Add new row of data to CSV list.
 
 ```c
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata);
@@ -89,7 +89,7 @@ void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 ### 6. CSV_REMOVE_ROW
 
-Remove a row of data from csv list.
+Remove a row of data from CSV list.
 
 ```c
 void csv_remove_row(unsigned int row, CSV_LIST *csv_list, CSV_METADATA *metadata);
@@ -97,8 +97,16 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list, CSV_METADATA *metadata
 
 ### 7. CSV_SHOW
 
-Display CSV data on to the terminal.
+Print raw CSV data to the `stdout`.
 
 ```c
 void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata);
+```
+
+### 8. CSV_CLEAR
+
+Free memory used by CSV structure.
+
+```c
+void csv_clear(CSV_LIST *csv_list, CSV_METADATA *metadata);
 ```
