@@ -283,11 +283,22 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
 /*             CSV_FIELD                       */
 /************************************************/
 
-CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
-                          CSV_METADATA *metadata) {
+void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
     if (strcmp(field, csv_list->field_list[i]->field) == 0) {
-      return csv_list->field_list[i];
+      CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
+
+      switch (field_type) {
+      case CHAR_TYPE: {
+        return csv_list->field_list[i]->char_block_head;
+      }
+      case INT_TYPE: {
+        return csv_list->field_list[i]->int_block_head;
+      }
+      case DOUBLE_TYPE: {
+        return csv_list->field_list[i]->double_block_head;
+      }
+      }
     }
   }
 
@@ -298,11 +309,23 @@ CSV_FIELD_LIST *csv_field(char *field, CSV_LIST *csv_list,
 /*             CSV_COLUMN                       */
 /************************************************/
 
-CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
-                           CSV_METADATA *metadata) {
+void *csv_column(unsigned int column, CSV_LIST *csv_list,
+                 CSV_METADATA *metadata) {
   for (int i = 0; i < metadata->fields; i++) {
     if (i == column) {
-      return csv_list->field_list[i];
+      CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
+
+      switch (field_type) {
+      case CHAR_TYPE: {
+        return csv_list->field_list[i]->char_block_head;
+      }
+      case INT_TYPE: {
+        return csv_list->field_list[i]->int_block_head;
+      }
+      case DOUBLE_TYPE: {
+        return csv_list->field_list[i]->double_block_head;
+      }
+      }
     }
   }
 
@@ -316,24 +339,36 @@ CSV_FIELD_LIST *csv_column(unsigned int column, CSV_LIST *csv_list,
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
   char *token = strtok(data, CSV_DELIMETER);
 
-  unsigned int field = 0;
+  unsigned field = 0;
 
   while (token != NULL) {
     token = util_trim_string(token);
 
-    /* -- Extract data */
+    int int_type = 0;
+    double double_type = 0;
 
-    CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
-    block->next_block = NULL;
-    block->data = token;
-
-    csv_list->field_list[field]->char_block_tail->next_block = block;
-    csv_list->field_list[field]->char_block_tail = block;
+    /* -- Extract double data */
+    if (util_string_to_double(token, &double_type) == 0) {
+      csv_list->field_list[field]->field_type = DOUBLE_TYPE;
+      csv_util_add_node(csv_list, field, &double_type, DOUBLE_TYPE);
+    }
+    /* -- Extract integer data */
+    else if (util_string_to_number(token, &int_type) == 0) {
+      csv_list->field_list[field]->field_type = INT_TYPE;
+      csv_util_add_node(csv_list, field, &int_type, INT_TYPE);
+    }
+    /* -- Extract string data */
+    else {
+      csv_list->field_list[field]->field_type = CHAR_TYPE;
+      csv_util_add_node(csv_list, field, token, CHAR_TYPE);
+    }
 
     field += 1;
 
     token = strtok(NULL, CSV_DELIMETER);
   }
+
+  metadata->items += 1;
 }
 
 /************************************************/
@@ -342,35 +377,109 @@ void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
 
 void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
                     CSV_METADATA *metadata) {
+
   for (int i = 0; i < metadata->fields; i++) {
     unsigned current_row = 0;
-    CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
-    CSV_CHAR_BLOCK *previous_block = block;
 
-    /* -- Remove first row */
-    if (row == 0) {
-      csv_list->field_list[i]->char_block_head = block->next_block;
+    CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
 
-      free(block);
-      continue;
-    }
+    switch (field_type) {
+    case CHAR_TYPE: {
+      CSV_CHAR_BLOCK *block = csv_list->field_list[i]->char_block_head;
+      CSV_CHAR_BLOCK *previous_block = block;
 
-    while (block != NULL) {
-      if (current_row == row) {
-        previous_block->next_block = block->next_block;
+      /* -- Remove first row */
+      if (row == 0) {
+        csv_list->field_list[i]->char_block_head = block->next_block;
 
-        block->next_block = NULL;
         free(block);
-
-        break;
+        continue;
       }
 
-      previous_block = block;
-      block = block->next_block;
+      while (block != NULL) {
+        if (current_row == row) {
+          previous_block->next_block = block->next_block;
 
-      current_row += 1;
+          block->next_block = NULL;
+          free(block);
+
+          break;
+        }
+
+        previous_block = block;
+        block = block->next_block;
+
+        current_row += 1;
+      }
+
+      break;
+    }
+
+    case INT_TYPE: {
+      CSV_INT_BLOCK *block = csv_list->field_list[i]->int_block_head;
+      CSV_INT_BLOCK *previous_block = block;
+
+      /* -- Remove first row */
+      if (row == 0) {
+        csv_list->field_list[i]->int_block_head = block->next_block;
+
+        free(block);
+        continue;
+      }
+
+      while (block != NULL) {
+        if (current_row == row) {
+          previous_block->next_block = block->next_block;
+
+          block->next_block = NULL;
+          free(block);
+
+          break;
+        }
+
+        previous_block = block;
+        block = block->next_block;
+
+        current_row += 1;
+      }
+
+      break;
+    }
+
+    case DOUBLE_TYPE: {
+      CSV_DOUBLE_BLOCK *block = csv_list->field_list[i]->double_block_head;
+      CSV_DOUBLE_BLOCK *previous_block = block;
+
+      /* -- Remove first row */
+      if (row == 0) {
+        csv_list->field_list[i]->double_block_head = block->next_block;
+
+        free(block);
+        continue;
+      }
+
+      while (block != NULL) {
+        if (current_row == row) {
+          previous_block->next_block = block->next_block;
+
+          block->next_block = NULL;
+          free(block);
+
+          break;
+        }
+
+        previous_block = block;
+        block = block->next_block;
+
+        current_row += 1;
+      }
+
+      break;
+    }
     }
   }
+
+  metadata->items -= 1;
 }
 
 /************************************************/
