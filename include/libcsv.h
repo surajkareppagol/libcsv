@@ -110,7 +110,7 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
 void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 /**
- * @brief Extract data from specific column.
+ * @brief Extract data from specific column
  *
  * @param column
  * @param csv_list
@@ -121,7 +121,7 @@ void *csv_column(unsigned int column, CSV_LIST *csv_list,
                  CSV_METADATA *metadata);
 
 /**
- * @brief Add a row of data.
+ * @brief Add a row of data
  *
  * @param data
  * @param metadata
@@ -129,7 +129,7 @@ void *csv_column(unsigned int column, CSV_LIST *csv_list,
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 /**
- * @brief Remove a row of data.
+ * @brief Remove a row of data
  *
  * @param data
  * @param csv_list
@@ -141,11 +141,19 @@ void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
 void csv_row();
 
 /**
- * @brief Show CSV data on to the terminal.
+ * @brief Show CSV data on to the terminal
  *
  * @param csv_list
  * @param metadata
  */
 void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata);
+
+/**
+ * @brief Free the memory allocated for csv_list
+ *
+ * @param csv_list
+ * @param metadata
+ */
+void csv_clear(CSV_LIST *csv_list, CSV_METADATA *metadata);
 
 #endif
