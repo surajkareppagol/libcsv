@@ -3,5 +3,6 @@ compile_commands.json
 
 .excalidraw
 build/*
+lib/*
 
 *.csv
