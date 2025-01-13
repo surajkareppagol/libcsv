@@ -33,6 +33,11 @@ void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
   case CHAR_TYPE: {
     CSV_CHAR_BLOCK *block = calloc(1, sizeof(CSV_CHAR_BLOCK));
 
+    if (block == NULL) {
+      fprintf(stderr, "%s: Memory allocation failed.\n", __func__);
+      return;
+    }
+
     block->next_block = NULL;
     block->data = (char *)data;
 
@@ -53,6 +58,11 @@ void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
   }
   case INT_TYPE: {
     CSV_INT_BLOCK *block = (CSV_INT_BLOCK *)calloc(1, sizeof(CSV_INT_BLOCK));
+
+    if (block == NULL) {
+      fprintf(stderr, "%s: Memory allocation failed.\n", __func__);
+      return;
+    }
 
     block->next_block = NULL;
     block->data = *((int *)data);
@@ -75,6 +85,11 @@ void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
   case DOUBLE_TYPE: {
     CSV_DOUBLE_BLOCK *block =
         (CSV_DOUBLE_BLOCK *)calloc(1, sizeof(CSV_DOUBLE_BLOCK));
+
+    if (block == NULL) {
+      fprintf(stderr, "%s: Memory allocation failed.\n", __func__);
+      return;
+    }
 
     block->next_block = NULL;
     block->data = *((double *)data);
@@ -103,6 +118,12 @@ void csv_util_add_node(CSV_LIST *csv_list, unsigned field, void *data,
 
 void csv_util_show(CSV_LIST *csv_list, FILE *csv_stream,
                    CSV_METADATA *metadata) {
+
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return;
+  }
+
   /* -- First print fields */
   for (int i = 0; i < metadata->fields; i++) {
     fprintf(csv_stream, "%s%s", csv_list->field_list[i]->field,
@@ -271,6 +292,11 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 /************************************************/
 
 void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return;
+  }
+
   FILE *csv_stream;
 
   /* -- Get CSV file name */
@@ -291,6 +317,11 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
 /************************************************/
 
 void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return NULL;
+  }
+
   for (int i = 0; i < metadata->fields; i++) {
     if (strcmp(field, csv_list->field_list[i]->field) == 0) {
       CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
@@ -318,6 +349,11 @@ void *csv_field(char *field, CSV_LIST *csv_list, CSV_METADATA *metadata) {
 
 void *csv_column(unsigned int column, CSV_LIST *csv_list,
                  CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return NULL;
+  }
+
   for (int i = 0; i < metadata->fields; i++) {
     if (i == column) {
       CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
@@ -344,6 +380,11 @@ void *csv_column(unsigned int column, CSV_LIST *csv_list,
 /************************************************/
 
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return;
+  }
+
   if (util_total_fields(data) != metadata->fields) {
     return;
   }
@@ -388,6 +429,10 @@ void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
 
 void csv_remove_row(unsigned int row, CSV_LIST *csv_list,
                     CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return;
+  }
 
   for (int i = 0; i < metadata->fields; i++) {
     unsigned current_row = 0;
@@ -510,6 +555,11 @@ void csv_show(CSV_LIST *csv_list, CSV_METADATA *metadata) {
 /************************************************/
 
 void csv_clear(CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  if (csv_list == NULL || metadata == NULL) {
+    fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
+    return;
+  }
+
   for (int i = 0; i < metadata->fields; i++) {
     CSV_FIELD_TYPE field_type = csv_list->field_list[i]->field_type;
 
