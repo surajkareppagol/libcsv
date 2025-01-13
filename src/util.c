@@ -11,6 +11,7 @@
  */
 
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -114,8 +115,6 @@ int util_total_fields(char *string) {
   unsigned total_fields = 0;
 
   while (token != NULL) {
-    token = util_trim_string(token);
-
     total_fields += 1;
 
     token = strtok(NULL, CSV_DELIMETER);
