@@ -196,11 +196,18 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
   }
 
   CSV_LIST *csv_list = calloc(1, sizeof(CSV_LIST));
+  *metadata = calloc(1, sizeof(CSV_METADATA));
 
   char csv_buffer[CSV_BUFFER_SIZE];
   memset(csv_buffer, 0, CSV_BUFFER_SIZE);
 
   while (fgets(csv_buffer, CSV_BUFFER_SIZE, csv_stream) != NULL) {
+    /* -- Check for correct number of fields */
+    if (fields_extracted == true &&
+        (util_total_fields(csv_buffer) != (*metadata)->fields)) {
+      continue;
+    }
+
     /* -- First extract all fields */
     char *token = strtok(csv_buffer, CSV_DELIMETER);
 
@@ -248,11 +255,10 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
     total_items += 1;
 
     fields_extracted = true;
+
+    (*metadata)->fields = total_fields;
   }
 
-  *metadata = calloc(1, sizeof(CSV_METADATA));
-
-  (*metadata)->fields = total_fields;
   (*metadata)->items = total_items - 1;
 
   fclose(csv_stream);
@@ -338,6 +344,10 @@ void *csv_column(unsigned int column, CSV_LIST *csv_list,
 /************************************************/
 
 void csv_add_row(char *data, CSV_LIST *csv_list, CSV_METADATA *metadata) {
+  if (util_total_fields(data) != metadata->fields) {
+    return;
+  }
+
   char *token = strtok(data, CSV_DELIMETER);
 
   unsigned field = 0;
