@@ -29,4 +29,12 @@ int util_string_to_number(char *string, int *data);
  */
 int util_string_to_double(char *string, double *data);
 
+/**
+ * @brief Extract and return total number of fields
+ *
+ * @param string
+ * @return int
+ */
+int util_total_fields(char *string);
+
 #endif
