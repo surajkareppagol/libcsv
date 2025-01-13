@@ -14,7 +14,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <libcsv.h>
 #include <util.h>
+
+/************************************************/
+/*             UTIL_TRIM_STRING                 */
+/************************************************/
 
 char *util_trim_string(char *string) {
   int string_len = strlen(string);
@@ -60,6 +65,10 @@ char *util_trim_string(char *string) {
   return trimmed_string;
 }
 
+/************************************************/
+/*             UTIL_STRING_TO_NUMBER            */
+/************************************************/
+
 int util_string_to_number(char *string, int *data) {
   char *characters;
 
@@ -71,6 +80,10 @@ int util_string_to_number(char *string, int *data) {
 
   return 0;
 }
+
+/************************************************/
+/*             UTIL_STRING_TO_DOUBLE            */
+/************************************************/
 
 int util_string_to_double(char *string, double *data) {
   if (strstr(string, ".") == NULL) {
@@ -86,4 +99,29 @@ int util_string_to_double(char *string, double *data) {
   }
 
   return 0;
+}
+
+/************************************************/
+/*             UTIL_TOTAL_FIELDS                */
+/************************************************/
+
+int util_total_fields(char *string) {
+  char *buffer = calloc(1, strlen(string));
+  strcpy(buffer, string);
+
+  char *token = strtok(buffer, CSV_DELIMETER);
+
+  unsigned total_fields = 0;
+
+  while (token != NULL) {
+    token = util_trim_string(token);
+
+    total_fields += 1;
+
+    token = strtok(NULL, CSV_DELIMETER);
+  }
+
+  free(buffer);
+
+  return total_fields;
 }
