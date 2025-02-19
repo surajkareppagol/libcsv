@@ -15,7 +15,7 @@ libcsv [options...]
 ```
 
 ```sh
-libcsv -i users.csv -a "user,2002,admin,new" -p -e
+libcsv -i users.csv -a "user,2002,admin,new" -p -o output.csv
 ```
 
 ## 📦️ Build Static Library
@@ -35,11 +35,12 @@ gcc -I./include csv_application.c -L./lib/ -lcsv
 
 | Option | Description        | Arguments                         |
 | ------ | ------------------ | --------------------------------- |
-| i      | Import CSV         | CSV file name required            |
-| a      | Append row of data | String of data separated by comma |
-| r      | Remove row of data | Index number (0 - Max items)      |
-| p      | Print CSV data     | None                              |
-| e      | Export to CSV file | None                              |
+| -i     | Import CSV         | CSV file name required            |
+| -a     | Append row of data | String of data separated by comma |
+| -r     | Remove row of data | Index number (0 - Max items)      |
+| -p     | Print CSV data     | None                              |
+| -o     | Export to CSV file | File name                         |
+| -h     | Print help         | None                              |
 
 ## ⚙️ API
 
@@ -59,7 +60,7 @@ Pass csv list and optional csv filename, also the metadata structure. A csv
 file will be created and the data from CSV list will be populated.
 
 ```c
-void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
+void csv_export(CSV_LIST *csv_list, CSV_METADATA *metadata, char *output);
 ```
 
 ### 3. CSV_FIELD
