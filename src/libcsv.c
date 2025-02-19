@@ -291,7 +291,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata) {
 /*             CSV_EXPORT                       */
 /************************************************/
 
-void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
+void csv_export(CSV_LIST *csv_list, CSV_METADATA *metadata, char *output) {
   if (csv_list == NULL || metadata == NULL) {
     fprintf(stderr, "%s: csv_list or metadata is NULL.\n", __func__);
     return;
@@ -300,11 +300,7 @@ void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata) {
   FILE *csv_stream;
 
   /* -- Get CSV file name */
-  if (csv_file == NULL) {
-    csv_stream = fopen(CSV_DEFAULT_FILE_NAME, "w");
-  } else {
-    csv_stream = fopen(csv_file, "w");
-  }
+  csv_stream = fopen(output, "w");
 
   /* -- Save data to a file */
   csv_util_show(csv_list, csv_stream, metadata);
