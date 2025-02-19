@@ -17,16 +17,17 @@
 #include <libcsv.h>
 #include <util.h>
 
-#define LIBCSV_ARGS "i:a:r:ep"
+#define LIBCSV_ARGS "i:o:a:r:ph"
 
 void csv_print_help(char *binary) {
   fprintf(stderr,
           "Usage: %s -i [file] -a [data] -e"
           "\n-i = Import CSV data into C object"
+          "\n-o = Export C object into CSV file"
           "\n-a = Append a row of data"
           "\n-r = Remove a row of data"
-          "\n-e = Export C object into CSV file"
           "\n-p = Print data"
+          "\n-h = Help"
           "\n",
           binary);
 }
@@ -62,13 +63,17 @@ int main(int argc, char **argv) {
 
       break;
     }
-    case 'e': {
-      csv_export(csv_list, NULL, metadata);
+    case 'o': {
+      csv_export(csv_list, metadata, optarg);
       break;
     }
     case 'p': {
       csv_show(csv_list, metadata);
       break;
+    }
+    case 'h': {
+      csv_print_help(argv[0]);
+      return 0;
     }
     default: {
       csv_print_help(argv[0]);
