@@ -97,7 +97,7 @@ CSV_LIST *csv_import(char *csv_file, CSV_METADATA **metadata);
  * @param csv_file
  * @param metadata
  */
-void csv_export(CSV_LIST *csv_list, char *csv_file, CSV_METADATA *metadata);
+void csv_export(CSV_LIST *csv_list, CSV_METADATA *metadata, char *output);
 
 /**
  * @brief Extract data from a specific field
